@@ -44,6 +44,10 @@ services:
     extends:
         file: docker-compose.common.yml
         service: grafana
+  mattermost-team-linux:
+    extends:
+        file: docker-compose.common.yml
+        service: mattermost-team-linux
 
   start_dependencies:
     image: mattermost/mattermost-wait-for-dep:latest

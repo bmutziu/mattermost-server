@@ -39,7 +39,7 @@ services:
     volumes:
       - ./docker/mysql.conf.d/replica.cnf:/etc/mysql/conf.d/mysql.cnf
   postgres:
-    image: "postgres:10"
+    image: "arm64v8/postgres:10-bullseye"
     restart: always
     networks:
       - mm-test
@@ -51,7 +51,7 @@ services:
     volumes:
      - "./docker/postgres.conf:/etc/postgresql/postgresql.conf"
     healthcheck:
-      test: [ "CMD", "pg_isready", "-h", "localhost" ]
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]  
       interval: 5s
       timeout: 10s
       retries: 3
@@ -65,7 +65,7 @@ services:
       MINIO_SECRET_KEY: miniosecretkey
       MINIO_SSE_MASTER_KEY: "my-minio-key:6368616e676520746869732070617373776f726420746f206120736563726574"
   inbucket:
-    image: "inbucket/inbucket:stable"
+    image: "inbucket/inbucket:latest"
     restart: always
     environment:
       INBUCKET_WEB_ADDR: "0.0.0.0:9001"
@@ -73,6 +73,10 @@ services:
       INBUCKET_SMTP_ADDR: "0.0.0.0:10025"
     networks:
       - mm-test
+    ports:
+      - "9001:9001"
+      - "10025:10025"
+      - "10110:10110"
   openldap:
     image: "osixia/openldap:1.4.0"
     restart: always
@@ -126,3 +130,11 @@ services:
      - "./docker/grafana/dashboards:/var/lib/grafana/dashboards"
     networks:
       - mm-test
+  mattermost-team-linux:
+    image: "bmutziu/mattermost-team-linux:7.4.0-arm64"
+    volumes:
+      - "./docker/mattermost-team-linux/config.json:/mattermost/config/config.json"
+    networks:
+      - mm-test
+    ports:
+      - 8065:8065
